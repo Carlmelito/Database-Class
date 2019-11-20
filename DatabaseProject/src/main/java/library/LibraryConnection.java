@@ -2,9 +2,9 @@ package library;
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -41,17 +41,15 @@ public class LibraryConnection {
      * @return ResultSet that contains all rows from database
      * @throws SQLException if connection to server fails
      */
-    public ResultSet getBooks(String isbn, String title, String author) throws SQLException {
+    public ResultSet getBooks(String search) throws SQLException {
         //Statement to send, and result to receive
         CallableStatement cstmt;
         ResultSet rs;
         
         //call getbooks stored procedure with given input parameters
-        cstmt = connection.prepareCall("{call dbo.getBooks(?, ?, ?)}");
-        cstmt.setString(1, isbn);
-        cstmt.setString(2, title);
-        cstmt.setString(3, author);
-        
+        cstmt = connection.prepareCall("{call dbo.getBooks(?)}");
+        cstmt.setString(1, search);
+
         //execute and capture result
         cstmt.execute();
         rs = cstmt.getResultSet();
@@ -68,17 +66,15 @@ public class LibraryConnection {
      * @return ResultSet that contains all rows from database
      * @throws SQLException if connection to server fails
      */
-    public ResultSet getCheckedOutBooks(String isbn, String title, String author) throws SQLException {
+    public ResultSet getCheckedOutBooks(String search) throws SQLException {
         //statement to send, and result to receive
         CallableStatement cstmt;
         ResultSet rs;
         
         //call getCheckedOutBooks procedure and set inputs
-        cstmt = connection.prepareCall("{call dbo.getCheckedOutBooks(?, ?, ?)}");
-        cstmt.setString(1, isbn);
-        cstmt.setString(2, title);
-        cstmt.setString(3, author);
-        
+        cstmt = connection.prepareCall("{call dbo.getCheckedOutBooks(?)}");
+        cstmt.setString(1, search);
+
         //execute and capture result
         cstmt.execute();
         rs = cstmt.getResultSet();
@@ -90,10 +86,9 @@ public class LibraryConnection {
     /**
      * Checks in a book
      * @param isbn isbn to check in 
-     * @return returns messages in form of warnings
      * @throws SQLException if connection fails
      */
-    public SQLWarning checkInBook(String isbn) throws SQLException {
+    public void checkInBook(String isbn) throws SQLException {
         //statement to send, and result to receive
         CallableStatement cstmt;
         ResultSet rs;
@@ -104,24 +99,60 @@ public class LibraryConnection {
         
         //execute and capture results
         cstmt.execute();
-        rs = cstmt.getResultSet();
-        //try to capture messages
-        SQLWarning warnings = cstmt.getWarnings();
-        if(warnings != null) {
-            return warnings;
-        }
-        
-        //iterate through all results and try to find message
-        while(!cstmt.getMoreResults() && cstmt.getUpdateCount() == -1) {
-            warnings = cstmt.getWarnings();
-            if(warnings != null) {
-                return warnings;
-            }
-        }
-        
-        return null;
+
     }
     
+        /**
+     * Checks in a book
+     * @param isbn isbn to check in 
+     * @return returns messages in form of warnings
+     * @throws SQLException if connection fails
+     */
+    public void updateFines() throws SQLException {
+        //statement to send, and result to receive
+        CallableStatement cstmt;
+        ResultSet rs;
+        
+        //call checkinbook procedure with inputs
+        cstmt = connection.prepareCall("{call dbo.UpdateFineAmounts}");
+        
+        //execute and capture results
+        cstmt.execute();
+    }
+    
+        public void payFine(String loanID) throws SQLException {
+        //statement to send, and result to receive
+        CallableStatement cstmt;
+        ResultSet rs;
+        
+        //call checkinbook procedure with inputs
+        cstmt = connection.prepareCall("{call dbo.payFine(?)}");
+        cstmt.setString(1, loanID);
+
+        //execute and capture results
+        cstmt.execute();
+    }
+        
+        public void addBorrower(String ssn,String first,String last,String address,String city,String state,String email, String phone) throws SQLException {
+        //statement to send, and result to receive
+        CallableStatement cstmt;
+        ResultSet rs;
+        
+        //call checkinbook procedure with inputs
+        cstmt = connection.prepareCall("{call dbo.addBorrower(?,?,?,?,?,?,?,?)}");
+        cstmt.setString(1, ssn);
+        cstmt.setString(2, first);
+        cstmt.setString(3, last);
+        cstmt.setString(4, address);
+        cstmt.setString(5, city);
+        cstmt.setString(6, state);
+        cstmt.setString(7, email);
+        cstmt.setString(8, phone);
+        
+        
+        //execute and capture results
+        cstmt.execute();
+    }
     
     /**
      * Checks out a book
@@ -130,47 +161,68 @@ public class LibraryConnection {
      * @return messages in the form of warnings
      * @throws SQLException if connection fails
      */
-    public SQLWarning checkoutBook(String isbn, String borrowerNumber) throws SQLException {
+    public void checkoutBook(String isbn, String borrowerNumber) throws SQLException {
         //Statement to send, result to receive
         CallableStatement cstmt;
         ResultSet rs;
         
         //call checkout book stored proecedure and set inputs
-        cstmt = connection.prepareCall("{call dbo.CheckoutBook(?, ?)}");
+        cstmt = connection.prepareCall("{call dbo.CheckoutBook(?,?)}");
         cstmt.setString(1, borrowerNumber);
         cstmt.setString(2, isbn);
         
         //execute and capture results
         cstmt.execute();
-        rs = cstmt.getResultSet();
-        //try to capture messages
-        SQLWarning warnings = cstmt.getWarnings();
-        if(warnings != null) {
-            return warnings;
-        }
         
-        //iterate through all results and try to find message
-        while(!cstmt.getMoreResults() && cstmt.getUpdateCount() == -1) {
-            warnings = cstmt.getWarnings();
-            if(warnings != null) {
-                return warnings;
-            }
-        }
-        
-        return null;
     }
     
+        /**
+     * Gets Borrowers
+     * @return resultset
+     * @throws SQLException if connection fails
+     */
+    public ResultSet getBorrowers() throws SQLException {
+        //Statement to send, result to receive
+        CallableStatement cstmt;
+        ResultSet rs;
+        
+        //call checkout book stored proecedure and set inputs
+        cstmt = connection.prepareCall("{call dbo.getBorrowers}");
+        
+        //execute and capture results
+        cstmt.execute();
+        rs = cstmt.getResultSet();
+        
+        return rs;
+    }
+    
+        public ResultSet getFines(String onlyPaid) throws SQLException {
+        //Statement to send, result to receive
+        CallableStatement cstmt;
+        ResultSet rs;
+        
+        //call checkout book stored proecedure and set inputs
+        cstmt = connection.prepareCall("{call dbo.getFines (?)}");
+        cstmt.setString(1, onlyPaid);
+        //execute and capture results
+        cstmt.execute();
+        rs = cstmt.getResultSet();
+        
+        return rs;
+    }
     /**
      * Creates a connection to a database given hardcoded inputs
      * @throws Exception if connection to server fails.
      */
     private void createConnection() throws Exception {
-        dataSource.setUser("sa");
-        dataSource.setPassword("databasepassword1!");
-        dataSource.setServerName("localhost");
-        dataSource.setDatabaseName("Library");
-
-        connection = dataSource.getConnection();
+        connection = DriverManager.getConnection("jdbc:sqlserver://localhost\\sqlexpress:1433;databaseName=Library;integratedSecurity=true;");
+//        
+//        dataSource.setUser("sa");
+//        dataSource.setPassword("databasepassword1!");
+//        dataSource.setServerName("localhost");
+//        dataSource.setDatabaseName("Library");
+//
+//        connection = dataSource.getConnection();
     }
     
 }
