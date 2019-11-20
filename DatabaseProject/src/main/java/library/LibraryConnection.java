@@ -41,14 +41,13 @@ public class LibraryConnection {
      * @return ResultSet that contains all rows from database
      * @throws SQLException if connection to server fails
      */
-    public ResultSet getBooks(String search) throws SQLException {
+    public ResultSet getBooks() throws SQLException {
         //Statement to send, and result to receive
         CallableStatement cstmt;
         ResultSet rs;
         
         //call getbooks stored procedure with given input parameters
-        cstmt = connection.prepareCall("{call dbo.getBooks(?)}");
-        cstmt.setString(1, search);
+        cstmt = connection.prepareCall("{call dbo.getBooks()}");
 
         //execute and capture result
         cstmt.execute();
@@ -66,14 +65,14 @@ public class LibraryConnection {
      * @return ResultSet that contains all rows from database
      * @throws SQLException if connection to server fails
      */
-    public ResultSet getCheckedOutBooks(String search) throws SQLException {
+    public ResultSet getCheckedOutBooks() throws SQLException {
         //statement to send, and result to receive
         CallableStatement cstmt;
         ResultSet rs;
         
         //call getCheckedOutBooks procedure and set inputs
-        cstmt = connection.prepareCall("{call dbo.getCheckedOutBooks(?)}");
-        cstmt.setString(1, search);
+        cstmt = connection.prepareCall("{call dbo.getCheckedOutBooks()}");
+
 
         //execute and capture result
         cstmt.execute();

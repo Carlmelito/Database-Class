@@ -68,7 +68,7 @@ public class MainForm extends javax.swing.JFrame {
     private void updateBookTables() {
         //setup main table
         try {
-            setTable(bookTable, connection.getBooks(searchTextField.getText()));
+            setTable(bookTable, connection.getBooks());
             filterTable(bookTable,searchTextField.getText());
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,7 +76,7 @@ public class MainForm extends javax.swing.JFrame {
         
         //setup checkout out books table
         try {
-            setTable(checkedBooksTable, connection.getCheckedOutBooks(checkedBooksSearch.getText()));
+            setTable(checkedBooksTable, connection.getCheckedOutBooks());
             filterTable(checkedBooksTable,checkedBooksSearch.getText());
         } catch (SQLException e) {
             e.printStackTrace();
@@ -596,15 +596,12 @@ public class MainForm extends javax.swing.JFrame {
         //check in book
         try {
             connection.checkInBook(isbn);
+            updateBookTables();
+            updateFinesTable();
             Toast.makeToast(this, "Checked in!", Toast.DURATION_SHORT);
         } catch (SQLException e) {
             Toast.makeToast(this, "Had an issue checking in...", Toast.DURATION_MEDIUM);
         }
-        
-        //update table
-        updateBookTables();
-        updateFinesTable();
-        
     }//GEN-LAST:event_Check_In_ButtonActionPerformed
 
     private void unpaid_CheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpaid_CheckActionPerformed
