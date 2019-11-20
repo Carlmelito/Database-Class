@@ -56,8 +56,6 @@ public class LibraryConnection {
         cstmt.execute();
         rs = cstmt.getResultSet();
         
-        //close statement
-        cstmt.close();
         //return result
         return rs;
     }
@@ -85,8 +83,6 @@ public class LibraryConnection {
         cstmt.execute();
         rs = cstmt.getResultSet();
         
-        //close statement
-        cstmt.close();
         //return result
         return rs;
     }
@@ -112,8 +108,6 @@ public class LibraryConnection {
         //try to capture messages
         SQLWarning warnings = cstmt.getWarnings();
         if(warnings != null) {
-            //close statement
-            cstmt.close();
             return warnings;
         }
         
@@ -121,8 +115,6 @@ public class LibraryConnection {
         while(!cstmt.getMoreResults() && cstmt.getUpdateCount() == -1) {
             warnings = cstmt.getWarnings();
             if(warnings != null) {
-                //close statement
-                cstmt.close();
                 return warnings;
             }
         }
@@ -154,8 +146,6 @@ public class LibraryConnection {
         //try to capture messages
         SQLWarning warnings = cstmt.getWarnings();
         if(warnings != null) {
-            //close statement
-            cstmt.close();
             return warnings;
         }
         
@@ -163,8 +153,6 @@ public class LibraryConnection {
         while(!cstmt.getMoreResults() && cstmt.getUpdateCount() == -1) {
             warnings = cstmt.getWarnings();
             if(warnings != null) {
-                //close statement
-                cstmt.close();
                 return warnings;
             }
         }
