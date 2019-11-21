@@ -117,7 +117,37 @@ public class MainForm extends javax.swing.JFrame {
         rs.close();
         
     }
+    
+    /**
+     * Finds the index of a row that matches a given isbn number
+     * @param isbn isbn to search for
+     * @return index that is found
+     */
+    private int findByISBN(String isbn) {
 
+        //filter the table on nothing, getraw
+        filterTable(bookTable, "");
+        
+        //for each JTable element
+        for(int i = 0; i < bookTable.getRowCount(); i++) {
+            //get isbn at this row
+            String currISBN = (String) bookTable.getModel().getValueAt(i, 0);
+            //if this isbn matches
+            if(isbn.equals(currISBN)) {
+                //filter the table on the search bar
+                filterTable(bookTable, searchTextField.getText());
+                //return this index
+                return i;
+            }
+        }
+        
+        //filter the table on the search bar
+        filterTable(bookTable, searchTextField.getText());
+        
+        //return -1 if not found
+        return -1;
+        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -287,7 +317,7 @@ public class MainForm extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(checkedBooksSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 593, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(37, 37, 37)
-                .addComponent(Check_In_Button, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+                .addComponent(Check_In_Button, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
                 .addGap(6, 6, 6))
         );
         jPanel2Layout.setVerticalGroup(
@@ -298,7 +328,7 @@ public class MainForm extends javax.swing.JFrame {
                     .addComponent(Check_In_Button)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(checkedBooksSearch)))
+                        .addComponent(checkedBooksSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -348,9 +378,9 @@ public class MainForm extends javax.swing.JFrame {
             .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 790, Short.MAX_VALUE)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
-                .addComponent(borrowerSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(borrowerSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 597, Short.MAX_VALUE)
                 .addGap(127, 127, 127))
         );
         jPanel3Layout.setVerticalGroup(
@@ -358,7 +388,7 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(borrowerSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 21, Short.MAX_VALUE)
+                    .addComponent(borrowerSearch)
                     .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(7, 7, 7)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -635,7 +665,8 @@ public class MainForm extends javax.swing.JFrame {
         try {
             connection.checkInBook(isbn);
             ((DefaultTableModel) checkedBooksTable.getModel()).removeRow(modelRow);
-            updateBookTable();
+            int index = findByISBN(isbn);
+            bookTable.getModel().setValueAt("Yes", index, 3);
             updateFinesTable();
             Toast.makeToast(this, "Checked in!", Toast.DURATION_SHORT);
         } catch (SQLException e) {
