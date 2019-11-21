@@ -93,7 +93,6 @@ public class MainForm extends javax.swing.JFrame {
     sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filter));
 
     table.setRowSorter(sorter);
-    
     }
     
     private void setTable(JTable table, ResultSet rs) throws SQLException {
@@ -103,7 +102,7 @@ public class MainForm extends javax.swing.JFrame {
         
         //get number of columns
         int columns = rs.getMetaData().getColumnCount();
-        
+
         //add each element from result set
         while(rs.next()) {  
             Object[] row = new Object[columns];
@@ -588,8 +587,9 @@ public class MainForm extends javax.swing.JFrame {
             Toast.makeToast(this, "Please select a book to checkout!", Toast.DURATION_LONG);
             return;
         }
-        String isbn = (String) bookTable.getModel().getValueAt(selected, 0);
-        String isAvailable = (String) bookTable.getModel().getValueAt(selected, 3);
+        int modelRow = bookTable.convertRowIndexToModel(selected);
+        String isbn = (String) bookTable.getModel().getValueAt(modelRow, 0);
+        String isAvailable = (String) bookTable.getModel().getValueAt(modelRow, 3);
         
         if(isAvailable.equals("No"))
         {
@@ -610,7 +610,7 @@ public class MainForm extends javax.swing.JFrame {
         //send sql command
         try {
             connection.checkoutBook(isbn, borrowerNumber);
-            bookTable.getModel().setValueAt("No", selected, 3);
+            bookTable.getModel().setValueAt("No", modelRow, 3);
             updateCheckedTable();
             Toast.makeToast(this, "Checkout completed!", Toast.DURATION_LONG);        
         } catch (SQLException e) {
@@ -626,12 +626,13 @@ public class MainForm extends javax.swing.JFrame {
             Toast.makeToast(this, "Please select a book to check in!", Toast.DURATION_LONG);
             return;
         }
-        String isbn = (String) checkedBooksTable.getModel().getValueAt(selected, 0);
+        int modelRow = checkedBooksTable.convertRowIndexToModel(selected);
+        String isbn = (String) checkedBooksTable.getModel().getValueAt(modelRow, 0);
 
         //check in book
         try {
             connection.checkInBook(isbn);
-            ((DefaultTableModel) checkedBooksTable.getModel()).removeRow(selected);
+            ((DefaultTableModel) checkedBooksTable.getModel()).removeRow(modelRow);
             updateBookTable();
             updateFinesTable();
             Toast.makeToast(this, "Checked in!", Toast.DURATION_SHORT);
@@ -671,8 +672,9 @@ public class MainForm extends javax.swing.JFrame {
             Toast.makeToast(this, "Please select a fine!", Toast.DURATION_LONG);
             return;
         }
-        int loanNumber = (int) finesTable.getModel().getValueAt(selected, 0);
-        String status = (String) finesTable.getModel().getValueAt(selected, 4);
+        int modelRow = finesTable.convertRowIndexToModel(selected);
+        int loanNumber = (int) finesTable.getModel().getValueAt(modelRow, 0);
+        String status = (String) finesTable.getModel().getValueAt(modelRow, 4);
 
         if(status.equals("Paid"))
         {
