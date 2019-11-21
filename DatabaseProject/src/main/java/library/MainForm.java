@@ -33,7 +33,8 @@ public class MainForm extends javax.swing.JFrame {
         initComponents();
         
         //setup all tables
-        updateBookTables();
+        updateBookTable();
+        updateCheckedTable();
         updateFinesTable();
         updateBorrowersTable();
         
@@ -43,7 +44,7 @@ public class MainForm extends javax.swing.JFrame {
     {
             try {
             setTable(borrowersTable,connection.getBorrowers());
-            filterTable(borrowersTable,"");
+            filterTable(borrowersTable,borrowerSearch.getText());
         }catch (SQLException e) {
             e.printStackTrace();
         }    
@@ -65,7 +66,7 @@ public class MainForm extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    private void updateBookTables() {
+    private void updateBookTable() {
         //setup main table
         try {
             setTable(bookTable, connection.getBooks());
@@ -73,7 +74,11 @@ public class MainForm extends javax.swing.JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+       
+    }
+    
+    private void updateCheckedTable()
+    {
         //setup checkout out books table
         try {
             setTable(checkedBooksTable, connection.getCheckedOutBooks());
@@ -82,13 +87,13 @@ public class MainForm extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    
     private void filterTable(JTable table,String filter)
     {
     TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(((DefaultTableModel) table.getModel())); 
     sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filter));
 
     table.setRowSorter(sorter);
+    
     }
     
     private void setTable(JTable table, ResultSet rs) throws SQLException {
@@ -139,6 +144,8 @@ public class MainForm extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         borrowersTable = new javax.swing.JTable();
+        borrowerSearch = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         finesTable = new javax.swing.JTable();
@@ -191,8 +198,8 @@ public class MainForm extends javax.swing.JFrame {
         jScrollPane1.setViewportView(bookTable);
 
         searchTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                searchTextFieldKeyTyped(evt);
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchTextFieldKeyReleased(evt);
             }
         });
 
@@ -212,12 +219,12 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 607, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(Check_Out_Button)
                 .addContainerGap())
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 790, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -263,8 +270,8 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         checkedBooksSearch.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                checkedBooksSearchKeyTyped(evt);
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                checkedBooksSearchKeyReleased(evt);
             }
         });
 
@@ -278,9 +285,9 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addComponent(checkedBooksSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 593, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45)
+                .addGap(37, 37, 37)
                 .addComponent(Check_In_Button, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
                 .addGap(6, 6, 6))
         );
@@ -289,11 +296,12 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(checkedBooksSearch)
-                    .addComponent(Check_In_Button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(8, 8, 8)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE))
+                    .addComponent(Check_In_Button)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(checkedBooksSearch)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jTabbedPane1.addTab("Check In", jPanel2);
@@ -326,15 +334,35 @@ public class MainForm extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(borrowersTable);
 
+        borrowerSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                borrowerSearchKeyReleased(evt);
+            }
+        });
+
+        jLabel12.setText("Search:");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 790, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(borrowerSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(127, 127, 127))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(borrowerSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 21, Short.MAX_VALUE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(7, 7, 7)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jTabbedPane1.addTab("Borrowers", jPanel3);
@@ -561,7 +589,13 @@ public class MainForm extends javax.swing.JFrame {
             return;
         }
         String isbn = (String) bookTable.getModel().getValueAt(selected, 0);
+        String isAvailable = (String) bookTable.getModel().getValueAt(selected, 3);
         
+        if(isAvailable.equals("No"))
+        {
+            Toast.makeToast(this, "Book is already checked out.", Toast.DURATION_LONG);  
+            return;
+        }
         //ask for borrower number
         String borrowerNumber = "";
         Referencer<String> borrowerRef = new Referencer<>(borrowerNumber);
@@ -576,7 +610,8 @@ public class MainForm extends javax.swing.JFrame {
         //send sql command
         try {
             connection.checkoutBook(isbn, borrowerNumber);
-            updateBookTables();
+            bookTable.getModel().setValueAt("No", selected, 3);
+            updateCheckedTable();
             Toast.makeToast(this, "Checkout completed!", Toast.DURATION_LONG);        
         } catch (SQLException e) {
             Toast.makeToast(this, "Book couldn't be checked out, message: " + e.getMessage(), Toast.DURATION_MEDIUM);
@@ -592,16 +627,19 @@ public class MainForm extends javax.swing.JFrame {
             return;
         }
         String isbn = (String) checkedBooksTable.getModel().getValueAt(selected, 0);
-        
+
         //check in book
         try {
             connection.checkInBook(isbn);
-            updateBookTables();
+            ((DefaultTableModel) checkedBooksTable.getModel()).removeRow(selected);
+            updateBookTable();
             updateFinesTable();
             Toast.makeToast(this, "Checked in!", Toast.DURATION_SHORT);
         } catch (SQLException e) {
             Toast.makeToast(this, "Had an issue checking in...", Toast.DURATION_MEDIUM);
         }
+
+
     }//GEN-LAST:event_Check_In_ButtonActionPerformed
 
     private void unpaid_CheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpaid_CheckActionPerformed
@@ -650,33 +688,6 @@ public class MainForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_payFine_ButtonActionPerformed
 
-    private void searchTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchTextFieldKeyTyped
-        //get all books that match from server
-//        try {
-//            ResultSet rs;
-//
-//                rs = connection.getBooks(searchTextField.getText());
-//            
-//            setTable(bookTable, rs);
-//        } catch (SQLException ex) {
-//            Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        filterTable(bookTable,searchTextField.getText());
-    }//GEN-LAST:event_searchTextFieldKeyTyped
-
-    private void checkedBooksSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_checkedBooksSearchKeyTyped
-                //get all books that match from server
-//        try {
-//            ResultSet rs;
-//                rs = connection.getCheckedOutBooks(checkedBooksSearch.getText());
-//            
-//            setTable(checkedBooksTable, rs);
-//        } catch (SQLException ex) {
-//            Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        filterTable(checkedBooksTable,checkedBooksSearch.getText());
-    }//GEN-LAST:event_checkedBooksSearchKeyTyped
-
     private void add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_buttonActionPerformed
         if(ssn_text.getText().equals("") 
                 || first_text.getText().equals("")
@@ -717,6 +728,18 @@ public class MainForm extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_add_buttonActionPerformed
+
+    private void borrowerSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_borrowerSearchKeyReleased
+        filterTable(borrowersTable,borrowerSearch.getText());
+    }//GEN-LAST:event_borrowerSearchKeyReleased
+
+    private void checkedBooksSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_checkedBooksSearchKeyReleased
+        filterTable(checkedBooksTable,checkedBooksSearch.getText());
+    }//GEN-LAST:event_checkedBooksSearchKeyReleased
+
+    private void searchTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchTextFieldKeyReleased
+        filterTable(bookTable,searchTextField.getText());
+    }//GEN-LAST:event_searchTextFieldKeyReleased
 
     public void clearBorrowerScreen()
     {
@@ -770,6 +793,7 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JButton add_button;
     private javax.swing.JTextField address_text;
     private javax.swing.JTable bookTable;
+    private javax.swing.JTextField borrowerSearch;
     private javax.swing.JTable borrowersTable;
     private javax.swing.JTextField checkedBooksSearch;
     private javax.swing.JTable checkedBooksTable;
@@ -780,6 +804,7 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
