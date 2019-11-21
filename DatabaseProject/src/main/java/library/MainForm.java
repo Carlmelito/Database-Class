@@ -15,111 +15,108 @@ import javax.swing.table.TableRowSorter;
  * @author Carlm
  * @author Arib Dhuka
  */
-
 public class MainForm extends javax.swing.JFrame {
 
     boolean isUnpaidOnly = false;
     //holds the connection to the libray database
     LibraryConnection connection;
-    
+
     /**
      * Creates new form MainForm
      */
     public MainForm() {
         //setup connection
         connection = new LibraryConnection();
-        
+
         //initialize frame
         initComponents();
-        
+
         //setup all tables
         updateBookTable();
         updateCheckedTable();
         updateFinesTable();
         updateBorrowersTable();
-        
+
     }
-    
-    private void updateBorrowersTable()
-    {
-            try {
-            setTable(borrowersTable,connection.getBorrowers());
-            filterTable(borrowersTable,borrowerSearch.getText());
-        }catch (SQLException e) {
-            e.printStackTrace();
-        }    
-    }
-    
-    private void updateFinesTable()
-    {
-          try {
-            String onlyPaid;
-            if(isUnpaidOnly)
-            {
-                onlyPaid = "1";
-            }
-            else 
-                onlyPaid = "0";
-            setTable(finesTable,connection.getFines(onlyPaid));
-            filterTable(finesTable,"");
-        }catch (SQLException e) {
+
+    private void updateBorrowersTable() {
+        try {
+            setTable(borrowersTable, connection.getBorrowers());
+            filterTable(borrowersTable, borrowerSearch.getText());
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+    private void updateFinesTable() {
+        try {
+            String onlyPaid;
+            if (isUnpaidOnly) {
+                onlyPaid = "1";
+            } else {
+                onlyPaid = "0";
+            }
+            setTable(finesTable, connection.getFines(onlyPaid));
+            filterTable(finesTable, "");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void updateBookTable() {
         //setup main table
         try {
             setTable(bookTable, connection.getBooks());
-            filterTable(bookTable,searchTextField.getText());
+            filterTable(bookTable, searchTextField.getText());
         } catch (SQLException e) {
             e.printStackTrace();
         }
-       
+
     }
-    
-    private void updateCheckedTable()
-    {
+
+    private void updateCheckedTable() {
         //setup checkout out books table
         try {
             setTable(checkedBooksTable, connection.getCheckedOutBooks());
-            filterTable(checkedBooksTable,checkedBooksSearch.getText());
+            filterTable(checkedBooksTable, checkedBooksSearch.getText());
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    private void filterTable(JTable table,String filter)
-    {
-    TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(((DefaultTableModel) table.getModel())); 
-    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filter));
 
-    table.setRowSorter(sorter);
+    private void filterTable(JTable table, String filter) {
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(((DefaultTableModel) table.getModel()));
+        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filter));
+
+        table.setRowSorter(sorter);
     }
-    
+
     private void setTable(JTable table, ResultSet rs) throws SQLException {
         //clear table
-        while(table.getRowCount() > 0)
+        while (table.getRowCount() > 0) {
             ((DefaultTableModel) table.getModel()).removeRow(0);
-        
+        }
+
         //get number of columns
         int columns = rs.getMetaData().getColumnCount();
 
         //add each element from result set
-        while(rs.next()) {  
+        while (rs.next()) {
             Object[] row = new Object[columns];
-            for (int i = 1; i <= columns; i++)
-            {  
+            for (int i = 1; i <= columns; i++) {
                 row[i - 1] = rs.getObject(i);
             }
-            ((DefaultTableModel) table.getModel()).insertRow(rs.getRow()-1,row);
+            ((DefaultTableModel) table.getModel()).insertRow(rs.getRow() - 1, row);
         }
-        
+
         //close result set
         rs.close();
-        
+
     }
-    
+
     /**
      * Finds the index of a row that matches a given isbn number
+     *
      * @param isbn isbn to search for
      * @return index that is found
      */
@@ -127,27 +124,28 @@ public class MainForm extends javax.swing.JFrame {
 
         //filter the table on nothing, getraw
         filterTable(bookTable, "");
-        
+
         //for each JTable element
-        for(int i = 0; i < bookTable.getRowCount(); i++) {
+        for (int i = 0; i < bookTable.getRowCount(); i++) {
             //get isbn at this row
             String currISBN = (String) bookTable.getModel().getValueAt(i, 0);
             //if this isbn matches
-            if(isbn.equals(currISBN)) {
+            if (isbn.equals(currISBN)) {
                 //filter the table on the search bar
                 filterTable(bookTable, searchTextField.getText());
                 //return this index
                 return i;
             }
         }
-        
+
         //filter the table on the search bar
         filterTable(bookTable, searchTextField.getText());
-        
+
         //return -1 if not found
         return -1;
-        
+
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -614,79 +612,90 @@ public class MainForm extends javax.swing.JFrame {
 
     private void Check_Out_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Check_Out_ButtonActionPerformed
         //get selected isbn
-        int selected = bookTable.getSelectedRow();
-        if(selected == -1) {
+        int[] allSelected = bookTable.getSelectedRows();
+
+        if (allSelected.length == 0) {
             Toast.makeToast(this, "Please select a book to checkout!", Toast.DURATION_LONG);
             return;
         }
-        int modelRow = bookTable.convertRowIndexToModel(selected);
-        String isbn = (String) bookTable.getModel().getValueAt(modelRow, 0);
-        String isAvailable = (String) bookTable.getModel().getValueAt(modelRow, 3);
-        
-        if(isAvailable.equals("No"))
-        {
-            Toast.makeToast(this, "Book is already checked out.", Toast.DURATION_LONG);  
-            return;
-        }
-        //ask for borrower number
-        String borrowerNumber = "";
-        Referencer<String> borrowerRef = new Referencer<>(borrowerNumber);
-        CheckOutDialog dialog = new CheckOutDialog(this, true, isbn, borrowerRef);
-        dialog.setVisible(true);
-        
-        //retreive borrower number
-        borrowerNumber = borrowerRef.get();
 
-        if(borrowerNumber == "-1")
-            return;
-        //send sql command
-        try {
-            connection.checkoutBook(isbn, borrowerNumber);
-            bookTable.getModel().setValueAt("No", modelRow, 3);
-            updateCheckedTable();
-            Toast.makeToast(this, "Checkout completed!", Toast.DURATION_LONG);        
-        } catch (SQLException e) {
-            Toast.makeToast(this, "Book couldn't be checked out, message: " + e.getMessage(), Toast.DURATION_MEDIUM);
+        for (int i = 0; i < allSelected.length; i++) {
+            int selected = allSelected[i];
+            int modelRow = bookTable.convertRowIndexToModel(selected);
+            String isbn = (String) bookTable.getModel().getValueAt(modelRow, 0);
+            String isAvailable = (String) bookTable.getModel().getValueAt(modelRow, 3);
+            String title = (String) bookTable.getModel().getValueAt(modelRow, 1);
+
+            if (isAvailable.equals("No")) {
+                Toast.makeToast(this, title + " is already checked out.", Toast.DURATION_LONG);
+                return;
+            }
+            //ask for borrower number
+            String borrowerNumber = "";
+            Referencer<String> borrowerRef = new Referencer<>(borrowerNumber);
+            CheckOutDialog dialog = new CheckOutDialog(this, true, isbn, borrowerRef);
+            dialog.setVisible(true);
+
+            //retreive borrower number
+            borrowerNumber = borrowerRef.get();
+
+            if (borrowerNumber.equals("-1")) {
+                return;
+            }
+            //send sql command
+            try {
+                connection.checkoutBook(isbn, borrowerNumber);
+                bookTable.getModel().setValueAt("No", modelRow, 3);
+                updateCheckedTable();
+                Toast.makeToast(this, title + " checked out successfully!", Toast.DURATION_LONG);
+            } catch (SQLException e) {
+                Toast.makeToast(this, "Book couldn't be checked out, message: " + e.getMessage(), Toast.DURATION_MEDIUM);
+            }
+            if (allSelected.length > 1) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
-        
     }//GEN-LAST:event_Check_Out_ButtonActionPerformed
 
     private void Check_In_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Check_In_ButtonActionPerformed
         //get selected isbn
-        int selected = checkedBooksTable.getSelectedRow();
-        if(selected == -1) {
+        int[] allSelected = checkedBooksTable.getSelectedRows();
+
+        if (allSelected.length == 0) {
             Toast.makeToast(this, "Please select a book to check in!", Toast.DURATION_LONG);
             return;
         }
-        int modelRow = checkedBooksTable.convertRowIndexToModel(selected);
-        String isbn = (String) checkedBooksTable.getModel().getValueAt(modelRow, 0);
+        for (int i = allSelected.length - 1; i >= 0; i--) {
+            int selected = allSelected[i];
+            int modelRow = checkedBooksTable.convertRowIndexToModel(selected);
+            String isbn = (String) checkedBooksTable.getModel().getValueAt(modelRow, 0);
 
-        //check in book
-        try {
-            connection.checkInBook(isbn);
-            ((DefaultTableModel) checkedBooksTable.getModel()).removeRow(modelRow);
-            int index = findByISBN(isbn);
-            bookTable.getModel().setValueAt("Yes", index, 3);
+            //check in book
+            try {
+                connection.checkInBook(isbn);
+                ((DefaultTableModel) checkedBooksTable.getModel()).removeRow(modelRow);
+                int index = findByISBN(isbn);
+                bookTable.getModel().setValueAt("Yes", index, 3);
+            } catch (SQLException e) {
+                Toast.makeToast(this, "Had an issue checking in...", Toast.DURATION_MEDIUM);
+            }
             updateFinesTable();
             Toast.makeToast(this, "Checked in!", Toast.DURATION_SHORT);
-        } catch (SQLException e) {
-            Toast.makeToast(this, "Had an issue checking in...", Toast.DURATION_MEDIUM);
         }
-
 
     }//GEN-LAST:event_Check_In_ButtonActionPerformed
 
     private void unpaid_CheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpaid_CheckActionPerformed
         isUnpaidOnly = !isUnpaidOnly;
-        if(isUnpaidOnly)
-        {
-            filterTable(finesTable,"UnPaid");
+        if (isUnpaidOnly) {
+            filterTable(finesTable, "UnPaid");
+        } else {
+            filterTable(finesTable, "");
         }
-        else
-        {
-            filterTable(finesTable,"");
-        }
-        //updateFinesTable();
     }//GEN-LAST:event_unpaid_CheckActionPerformed
 
     private void updateFines_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateFines_ButtonActionPerformed
@@ -699,64 +708,68 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_updateFines_ButtonActionPerformed
 
     private void payFine_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payFine_ButtonActionPerformed
-                //get selected isbn
-        int selected = finesTable.getSelectedRow();
-        if(selected == -1) {
+        //get selected isbn
+        int[] allSelected = finesTable.getSelectedRows();
+
+        boolean aFinePaid = false;
+        if (allSelected.length == 0) {
             Toast.makeToast(this, "Please select a fine!", Toast.DURATION_LONG);
             return;
         }
-        int modelRow = finesTable.convertRowIndexToModel(selected);
-        int loanNumber = (int) finesTable.getModel().getValueAt(modelRow, 0);
-        String status = (String) finesTable.getModel().getValueAt(modelRow, 4);
+        for (int i = 0; i < allSelected.length; i++) {
+            int selected = allSelected[i];
+            int modelRow = finesTable.convertRowIndexToModel(selected);
+            int loanNumber = (int) finesTable.getModel().getValueAt(modelRow, 0);
+            String status = (String) finesTable.getModel().getValueAt(modelRow, 4);
 
-        if(status.equals("Paid"))
-        {
-          Toast.makeToast(this, "Fine is already Paid!", Toast.DURATION_LONG);        
-          return;
+            if (status.equals("Paid")) {
+                if (allSelected.length == 1) {
+                    Toast.makeToast(this, "Fine is already Paid!", Toast.DURATION_LONG);
+                }
+                continue;
+            }
+            try {
+                aFinePaid = true;
+                connection.payFine(String.valueOf(loanNumber));
+            } catch (SQLException e) {
+                Toast.makeToast(this, "Problem paying fine, please try again.", Toast.DURATION_MEDIUM);
+            }
         }
-        try {
-            connection.payFine(String.valueOf(loanNumber));
-            updateFinesTable();
-            Toast.makeToast(this, "Fine Paid!", Toast.DURATION_LONG);        
-        } catch (SQLException e) {
-            Toast.makeToast(this, "Problem paying fine, please try again.", Toast.DURATION_MEDIUM);
-        }
+        updateFinesTable();
+        if (aFinePaid)
+            Toast.makeToast(this, "Fine(s) Paid!", Toast.DURATION_LONG);
     }//GEN-LAST:event_payFine_ButtonActionPerformed
 
     private void add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_buttonActionPerformed
-        if(ssn_text.getText().equals("") 
+        if (ssn_text.getText().equals("")
                 || first_text.getText().equals("")
                 || last_text.getText().equals("")
                 || address_text.getText().equals("")
                 || city_text.getText().equals("")
                 || state_text.getText().equals("")
                 || email_text.getText().equals("")
-                || phone_text.getText().equals("")){
-            Toast.makeToast(this, "All fields must be filled out", Toast.DURATION_LONG);  
+                || phone_text.getText().equals("")) {
+            Toast.makeToast(this, "All fields must be filled out", Toast.DURATION_LONG);
             return;
         }
-        
-        if(state_text.getText().length() != 2)
-        {
-            Toast.makeToast(this, "State must be state code only", Toast.DURATION_LONG);  
+
+        if (state_text.getText().length() != 2) {
+            Toast.makeToast(this, "State must be state code only", Toast.DURATION_LONG);
             return;
         }
-        
-                try {
-            connection.addBorrower(ssn_text.getText(),first_text.getText(),
+
+        try {
+            connection.addBorrower(ssn_text.getText(), first_text.getText(),
                     last_text.getText(),
                     address_text.getText(),
                     city_text.getText(),
                     state_text.getText(),
                     email_text.getText(),
-                    phone_text.getText());      
+                    phone_text.getText());
         } catch (SQLException e) {
-            if(!e.getMessage().startsWith("New Card ID is "))
-            {
+            if (!e.getMessage().startsWith("New Card ID is ")) {
                 Toast.makeToast(this, e.getMessage(), Toast.DURATION_MEDIUM);
-            }
-            else
-            {
+            } else {
                 Toast.makeToast(this, e.getMessage(), Toast.DURATION_MEDIUM);
                 clearBorrowerScreen();
                 updateBorrowersTable();
@@ -765,19 +778,18 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_add_buttonActionPerformed
 
     private void borrowerSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_borrowerSearchKeyReleased
-        filterTable(borrowersTable,borrowerSearch.getText());
+        filterTable(borrowersTable, borrowerSearch.getText());
     }//GEN-LAST:event_borrowerSearchKeyReleased
 
     private void checkedBooksSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_checkedBooksSearchKeyReleased
-        filterTable(checkedBooksTable,checkedBooksSearch.getText());
+        filterTable(checkedBooksTable, checkedBooksSearch.getText());
     }//GEN-LAST:event_checkedBooksSearchKeyReleased
 
     private void searchTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchTextFieldKeyReleased
-        filterTable(bookTable,searchTextField.getText());
+        filterTable(bookTable, searchTextField.getText());
     }//GEN-LAST:event_searchTextFieldKeyReleased
 
-    public void clearBorrowerScreen()
-    {
+    public void clearBorrowerScreen() {
         ssn_text.setText("");
         first_text.setText("");
         last_text.setText("");
@@ -785,8 +797,9 @@ public class MainForm extends javax.swing.JFrame {
         city_text.setText("");
         state_text.setText("");
         email_text.setText("");
-        phone_text.setText(""); 
+        phone_text.setText("");
     }
+
     /**
      * @param args the command line arguments
      */
