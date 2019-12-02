@@ -736,6 +736,11 @@ public class MainForm extends javax.swing.JFrame {
             }
         }
         updateFinesTable();
+        
+        for(int i = 0; i < allSelected.length; i++)
+        {
+            finesTable.setRowSelectionInterval(allSelected[i], allSelected[i]);
+        }
         if (aFinePaid)
             Toast.makeToast(this, "Fine(s) Paid!", Toast.DURATION_LONG);
     }//GEN-LAST:event_payFine_ButtonActionPerformed
