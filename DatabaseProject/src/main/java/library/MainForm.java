@@ -701,6 +701,7 @@ public class MainForm extends javax.swing.JFrame {
     private void updateFines_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateFines_ButtonActionPerformed
         try {
             connection.updateFines();
+            Toast.makeToast(this, "Fines have been updated", Toast.DURATION_MEDIUM);
         } catch (SQLException ex) {
             Toast.makeToast(this, "Could not update fines", Toast.DURATION_MEDIUM);
         }
@@ -712,6 +713,7 @@ public class MainForm extends javax.swing.JFrame {
         int[] allSelected = finesTable.getSelectedRows();
 
         boolean aFinePaid = false;
+        boolean errorOccured = false;
         if (allSelected.length == 0) {
             Toast.makeToast(this, "Please select a fine!", Toast.DURATION_LONG);
             return;
@@ -729,11 +731,13 @@ public class MainForm extends javax.swing.JFrame {
                 continue;
             }
             try {
-                aFinePaid = true;
                 connection.payFine(String.valueOf(loanNumber));
             } catch (SQLException e) {
-                Toast.makeToast(this, "Problem paying fine, please try again.", Toast.DURATION_MEDIUM);
+                Toast.makeToast(this, e.getMessage(), Toast.DURATION_MEDIUM);
+                errorOccured = true;
+                continue;
             }
+            aFinePaid = true;
         }
         updateFinesTable();
         
@@ -742,7 +746,15 @@ public class MainForm extends javax.swing.JFrame {
             finesTable.setRowSelectionInterval(allSelected[i], allSelected[i]);
         }
         if (aFinePaid)
+        {
+            if(errorOccured)
+                try {
+                    Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
             Toast.makeToast(this, "Fine(s) Paid!", Toast.DURATION_LONG);
+        }
     }//GEN-LAST:event_payFine_ButtonActionPerformed
 
     private void add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_buttonActionPerformed
