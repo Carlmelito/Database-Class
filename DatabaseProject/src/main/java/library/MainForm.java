@@ -14,6 +14,7 @@ import javax.swing.table.TableRowSorter;
  *
  * @author Carlm
  * @author Arib Dhuka
+ * @author Shaiyann Reza
  */
 public class MainForm extends javax.swing.JFrame {
 
@@ -51,11 +52,14 @@ public class MainForm extends javax.swing.JFrame {
     private void updateFinesTable() {
         try {
             String onlyPaid;
+            //Check filter status
             if (isUnpaidOnly) {
                 onlyPaid = "1";
             } else {
                 onlyPaid = "0";
             }
+            
+            //set table with updated fines
             setTable(finesTable, connection.getFines(onlyPaid));
             filterTable(finesTable, "");
         } catch (SQLException e) {
@@ -85,6 +89,7 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private void filterTable(JTable table, String filter) {
+        //Set new table sorter
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(((DefaultTableModel) table.getModel()));
         sorter.setRowFilter(RowFilter.regexFilter("(?i)" + filter));
 
@@ -620,6 +625,7 @@ public class MainForm extends javax.swing.JFrame {
         }
 
         for (int i = 0; i < allSelected.length; i++) {
+            //Get selected row information
             int selected = allSelected[i];
             int modelRow = bookTable.convertRowIndexToModel(selected);
             String isbn = (String) bookTable.getModel().getValueAt(modelRow, 0);
@@ -646,6 +652,7 @@ public class MainForm extends javax.swing.JFrame {
             try {
                 connection.checkoutBook(isbn, borrowerNumber);
                 bookTable.getModel().setValueAt("No", modelRow, 3);
+                //Update table
                 updateCheckedTable();
                 Toast.makeToast(this, title + " checked out successfully!", Toast.DURATION_LONG);
             } catch (SQLException e) {
@@ -691,6 +698,7 @@ public class MainForm extends javax.swing.JFrame {
 
     private void unpaid_CheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unpaid_CheckActionPerformed
         isUnpaidOnly = !isUnpaidOnly;
+        //Filter table by unpaid or not unpaid
         if (isUnpaidOnly) {
             filterTable(finesTable, "UnPaid");
         } else {
@@ -699,6 +707,7 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_unpaid_CheckActionPerformed
 
     private void updateFines_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateFines_ButtonActionPerformed
+        //Update fines
         try {
             connection.updateFines();
             Toast.makeToast(this, "Fines have been updated", Toast.DURATION_MEDIUM);
@@ -719,6 +728,7 @@ public class MainForm extends javax.swing.JFrame {
             return;
         }
         for (int i = 0; i < allSelected.length; i++) {
+            //Get selected row information
             int selected = allSelected[i];
             int modelRow = finesTable.convertRowIndexToModel(selected);
             int loanNumber = (int) finesTable.getModel().getValueAt(modelRow, 0);
@@ -730,9 +740,11 @@ public class MainForm extends javax.swing.JFrame {
                 }
                 continue;
             }
+            //Pay fine
             try {
                 connection.payFine(String.valueOf(loanNumber));
             } catch (SQLException e) {
+                //Fine not paid
                 Toast.makeToast(this, e.getMessage(), Toast.DURATION_MEDIUM);
                 errorOccured = true;
                 continue;
@@ -741,6 +753,7 @@ public class MainForm extends javax.swing.JFrame {
         }
         updateFinesTable();
         
+        //Give focus back to rows
         for(int i = 0; i < allSelected.length; i++)
         {
             finesTable.setRowSelectionInterval(allSelected[i], allSelected[i]);
@@ -758,6 +771,7 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_payFine_ButtonActionPerformed
 
     private void add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_buttonActionPerformed
+        //Check text values for empty
         if (ssn_text.getText().equals("")
                 || first_text.getText().equals("")
                 || last_text.getText().equals("")
@@ -770,11 +784,13 @@ public class MainForm extends javax.swing.JFrame {
             return;
         }
 
+        //Check state text for length 2
         if (state_text.getText().length() != 2) {
             Toast.makeToast(this, "State must be state code only", Toast.DURATION_LONG);
             return;
         }
 
+        //Add borrower
         try {
             connection.addBorrower(ssn_text.getText(), first_text.getText(),
                     last_text.getText(),

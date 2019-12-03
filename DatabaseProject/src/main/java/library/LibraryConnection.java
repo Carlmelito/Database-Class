@@ -37,9 +37,6 @@ public class LibraryConnection {
     /**
      * Gets the list of all books that match a given input
      *
-     * @param isbn isbn to search for
-     * @param title title of book to search for
-     * @param author author to search for
      * @return ResultSet that contains all rows from database
      * @throws SQLException if connection to server fails
      */
@@ -62,9 +59,6 @@ public class LibraryConnection {
     /**
      * Gets all books that are already checked out
      *
-     * @param isbn isbn to search for
-     * @param title title of book to search for
-     * @param author author to search for
      * @return ResultSet that contains all rows from database
      * @throws SQLException if connection to server fails
      */
@@ -87,7 +81,7 @@ public class LibraryConnection {
     /**
      * Checks in a book
      *
-     * @param isbn isbn to check in
+     * @param isbn to check in
      * @throws SQLException if connection fails
      */
     public void checkInBook(String isbn) throws SQLException {
@@ -107,8 +101,7 @@ public class LibraryConnection {
     /**
      * Checks in a book
      *
-     * @param isbn isbn to check in
-     * @return returns messages in form of warnings
+     * @return returns messages in form of errors
      * @throws SQLException if connection fails
      */
     public void updateFines() throws SQLException {
@@ -161,7 +154,6 @@ public class LibraryConnection {
      *
      * @param isbn which book to check out
      * @param borrowerNumber who to check out to
-     * @return messages in the form of warnings
      * @throws SQLException if connection fails
      */
     public void checkoutBook(String isbn, String borrowerNumber) throws SQLException {
