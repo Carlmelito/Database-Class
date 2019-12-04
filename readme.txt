@@ -9,4 +9,9 @@ To run this file you will need Microsoft SQL Server installed on your system. Yo
 
 You will also need a Java Runtime Environment, otherwise known as a JRE. This can be found at https://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-The application is built in Java, so to edit the source code you will need a JDK that can be found at the same link as the JRE.
+However if you wish to build the project you will need maven which can be found at https://maven.apache.org/download.cgi
+
+You will also need an JDK to be able to compile the code. This can be found at the same link as the JRE.
+
+After you have these, you can navigate into the repository folder and run 'mvn package'
+then navigate into the target folder. There will be a DatabaseProject-2.0-jar-with-dependencies.jar file. Run this executable file.
