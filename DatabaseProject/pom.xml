@@ -3,11 +3,49 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mycompany</groupId>
     <artifactId>DatabaseProject</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>13</maven.compiler.source>
         <maven.compiler.target>13</maven.compiler.target>
     </properties>
+    <dependencies>
+
+        <!-- ORACLE database driver -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>6.4.0.jre8</version>
+        </dependency>
+
+    </dependencies>
+    
+    <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <archive>
+                <manifest>
+                  <addClasspath>true</addClasspath>
+                  <mainClass>library.MainForm</mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+          </plugin> 
+        </plugins>
+      </build>
+    
 </project>
